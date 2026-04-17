@@ -17,6 +17,9 @@ interface MedicationDao {
     @Query("SELECT * FROM medications ORDER BY targetTimeInMillis ASC")
     fun getAllMedications(): Flow<List<Medication>>
 
+    @Query("SELECT * FROM medications WHERE isTaken = 0")
+    suspend fun getAllUntakenMedications(): List<Medication>
+
     @Query("SELECT * FROM medications WHERE targetTimeInMillis > :currentTime AND isTaken = 0")
     suspend fun getPendingMedications(currentTime: Long): List<Medication>
 

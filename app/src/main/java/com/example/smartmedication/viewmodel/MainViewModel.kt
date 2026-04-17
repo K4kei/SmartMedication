@@ -67,7 +67,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun scheduleNotification(id: Int, name: String, dosage: String, targetTime: Long) {
         val delay = targetTime - System.currentTimeMillis()
 
-        if (delay <= 0) return
+        // If delay is negative, it means the time has passed. 
+        // We should trigger it immediately (delay = 0) to ensure the user doesn't miss it.
+        val finalDelay = if (delay > 0) delay else 0L
 
         val inputData = workDataOf(
             "MED_ID" to id,
@@ -75,14 +77,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             "MED_DOSAGE" to dosage
         )
 
-        // ✅ Requirement Met: Battery constraint for power sensitivity
-        val constraints = Constraints.Builder()
-            .setRequiresBatteryNotLow(true)
-            .build()
-
+        // Removed battery constraints to ensure reliability for medication reminders
         val request = OneTimeWorkRequestBuilder<MedicationWorker>()
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-            .setConstraints(constraints)
+            .setInitialDelay(finalDelay, TimeUnit.MILLISECONDS)
             .setInputData(inputData)
             .build()
 
